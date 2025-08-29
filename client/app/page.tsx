@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSocket } from './hooks/useSocket';
@@ -6,16 +8,33 @@ import LoginPage from './components/LoginPage';
 import ChatPage from './components/ChatPage';
 import type { Message } from '../../shared/types';
 
-function App() {
-  const [user, setUser] = useState<{ id: string; email: string; username: string } | null>(() => {
-    const userData = localStorage.getItem('user_data');
-    return userData ? JSON.parse(userData) : null;
-  });
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return !!localStorage.getItem('auth_token');
-  });
+export default function Home() {
+  const [user, setUser] = useState<{ id: string; email: string; username: string } | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Handle client-side initialization after hydration
+  useEffect(() => {
+    const userData = localStorage.getItem('user_data');
+    const token = localStorage.getItem('auth_token');
+    
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData));
+      } catch (error) {
+        console.error('Failed to parse user data:', error);
+        localStorage.removeItem('user_data');
+      }
+    }
+    
+    if (token) {
+      setIsAuthenticated(true);
+    }
+    
+    setIsLoading(false);
+  }, []);
 
   const {
     isConnected,
@@ -91,6 +110,18 @@ function App() {
     sendMessage(conversationId, content);
   };
 
+  // Show loading state during initial hydration
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <LoginPage 
@@ -101,7 +132,19 @@ function App() {
   }
 
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">User data not found</p>
+          <button 
+            onClick={handleLogout}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Return to Login
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -118,5 +161,3 @@ function App() {
     />
   );
 }
-
-export default App;

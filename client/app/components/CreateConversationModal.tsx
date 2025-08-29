@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, type FormEvent, type KeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
 import type { UserSearchResult } from '../../../shared/types';
@@ -105,7 +107,7 @@ export default function CreateConversationModal({
         }
       }}
     >
-      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-auto border border-gray-200 relative" style={{ zIndex: 10000 }}>
+      <div className="bg-white rounded-lg shadow-modal p-6 w-full max-w-md mx-auto border border-gray-200 relative animate-slide-up" style={{ zIndex: 10000 }}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Create New Conversation</h2>
           <button

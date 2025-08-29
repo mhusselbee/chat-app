@@ -1,3 +1,5 @@
+'use client'
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import type { Conversation, Message } from '../../../shared/types';
@@ -96,7 +98,7 @@ function ChatPage({
           isCreatingConversation={createConversationMutation.isPending}
         />
 
-        <div className="flex-1 flex flex-col" style={{ height: 'calc(100vh - 16px)', width: 'calc(100% - 32px)', marginLeft: '16px', marginRight: '16px' }}>
+        <div className="flex-1 flex flex-col h-screen mx-4">
           {selectedConversationId ? (
             <>
               <ChatHeader conversationName={getConversationName()} />

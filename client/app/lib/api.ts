@@ -6,7 +6,7 @@ import type {
   AuthResponse 
 } from '../../../shared/types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 const getAuthToken = (): string | null => {
   return localStorage.getItem('auth_token');

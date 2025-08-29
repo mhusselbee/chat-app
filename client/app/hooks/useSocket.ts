@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import type { Message } from '../../../shared/types';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
 export const useSocket = () => {
   const [socket, setSocket] = useState<Socket | null>(null);

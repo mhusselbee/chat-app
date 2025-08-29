@@ -16,10 +16,10 @@ function MessagesList({ messages, currentUserId }: MessagesListProps) {
           }`}
         >
           <div
-            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg shadow-sm animate-fade-in ${
               message.userId === currentUserId
-                ? 'bg-blue-500 text-white'
-                : 'bg-white text-gray-800 border border-gray-200'
+                ? 'bg-blue-500 text-white shadow-chat'
+                : 'bg-white text-gray-800 border border-gray-200 shadow-chat'
             }`}
           >
             {message.userId !== currentUserId && (
