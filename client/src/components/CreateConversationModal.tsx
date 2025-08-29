@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type KeyboardEvent } from 'react';
+import { createPortal } from 'react-dom';
 import type { UserSearchResult } from '../../../shared/types';
 
 interface CreateConversationModalProps {
@@ -32,8 +33,7 @@ export default function CreateConversationModal({
     onClose();
   };
 
-  const handleAddParticipant = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleAddParticipant = async () => {
     const trimmedUsername = usernameInput.trim();
     
     if (!trimmedUsername) {
@@ -87,16 +87,25 @@ export default function CreateConversationModal({
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+      style={{ 
+        zIndex: 9999,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0
+      }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           handleClose();
         }
       }}
     >
-      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-auto border border-gray-200">
+      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-auto border border-gray-200 relative" style={{ zIndex: 10000 }}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Create New Conversation</h2>
           <button
@@ -128,23 +137,30 @@ export default function CreateConversationModal({
               Add Participants
             </label>
             
-            <form onSubmit={handleAddParticipant} className="flex space-x-2 mb-3">
+            <div className="flex space-x-2 mb-3">
               <input
                 type="text"
                 value={usernameInput}
                 onChange={(e) => setUsernameInput(e.target.value)}
+                onKeyPress={(e: KeyboardEvent<HTMLInputElement>) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddParticipant();
+                  }
+                }}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter username"
                 disabled={isValidating}
               />
               <button
-                type="submit"
+                type="button"
+                onClick={handleAddParticipant}
                 disabled={isValidating || !usernameInput.trim()}
                 className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               >
                 {isValidating ? 'Checking...' : 'Add'}
               </button>
-            </form>
+            </div>
 
             {error && (
               <div className="text-red-600 text-sm mb-3">{error}</div>
@@ -196,4 +212,6 @@ export default function CreateConversationModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
