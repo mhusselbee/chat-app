@@ -19,7 +19,7 @@ function MessageInput({ onSendMessage, disabled = false }: MessageInputProps) {
   };
 
   return (
-    <div className="p-4 m-6 bg-white">
+    <div className="p-4 m-6 bg-white shadow-lg rounded-lg">
       <form onSubmit={handleSubmit} className="flex space-x-2">
         <input
           type="text"
