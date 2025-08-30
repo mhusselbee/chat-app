@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSocket } from './hooks/useSocket';
 import { api } from './lib/api';
-import LoginPage from './components/LoginPage';
-import ChatPage from './components/ChatPage';
+import LoginPage from './pages/LoginPage';
+import ChatPage from './pages/ChatPage';
 import type { Message } from '../../shared/types';
 
 export default function Home() {

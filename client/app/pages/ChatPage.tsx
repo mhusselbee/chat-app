@@ -4,12 +4,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import type { Conversation, Message } from '../../../shared/types';
 import { api } from '../lib/api';
-import ChatHeader from './ChatHeader';
-import CreateConversationModal from './CreateConversationModal';
-import EmptyState from './EmptyState';
-import MessageInput from './MessageInput';
-import MessagesList from './MessagesList';
-import Sidebar from './Sidebar';
+import ChatHeader from '../components/ChatHeader';
+import CreateConversationModal from '../components/CreateConversationModal';
+import EmptyState from '../components/EmptyState';
+import MessageInput from '../components/MessageInput';
+import MessagesList from '../components/MessagesList';
+import Sidebar from '../components/Sidebar';
 
 interface ChatPageProps {
   user: { id: string; email: string; username: string };
