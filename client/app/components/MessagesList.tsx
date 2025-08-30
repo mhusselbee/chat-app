@@ -1,4 +1,3 @@
-import useScrollIntoView from '@/hooks/useScrollIntoView';
 import type { Message } from '../../../shared/types';
 import { MessageItem } from './Message';
 

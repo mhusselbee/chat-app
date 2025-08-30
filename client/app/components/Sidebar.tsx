@@ -26,8 +26,7 @@ function Sidebar({
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Chat App</h1>
-            <p className="text-sm text-gray-600">Welcome, {user.username}!</p>
+            <p className="text-md text-gray">Welcome, {user.username}!</p>
             <div className="text-xs text-gray-500 mt-1">
               {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
             </div>

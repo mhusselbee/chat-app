@@ -1,15 +1,15 @@
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { and, desc, eq, inArray, or } from 'drizzle-orm';
 import express from 'express';
 import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
-import cors from 'cors';
-import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
+import type { AuthResponse, SignInRequest, SignUpRequest } from '../../shared/types';
 import db from './db';
-import { users, conversations, messages, conversationParticipants } from './db/schema';
-import { eq, desc, and, inArray, or } from 'drizzle-orm';
-import type { CreateConversationRequest, SignUpRequest, SignInRequest, AuthResponse } from '../../shared/types';
-import { hashPassword, comparePassword, generateToken, verifyToken } from './utils/auth';
-import { authenticateToken, AuthenticatedRequest } from './middleware/auth';
+import { conversationParticipants, conversations, messages, users } from './db/schema';
+import { AuthenticatedRequest, authenticateToken } from './middleware/auth';
+import { comparePassword, generateToken, hashPassword, verifyToken } from './utils/auth';
 
 dotenv.config();
 
