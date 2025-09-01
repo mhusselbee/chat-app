@@ -1,8 +1,9 @@
 'use client'
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import type { Conversation, Message } from '../../../shared/types';
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '../hooks/useAuth';
+import { useSocketContext } from '../context/SocketContext';
 import { api } from '../lib/api';
 import ChatHeader from '../components/ChatHeader';
 import CreateConversationModal from '../components/CreateConversationModal';
@@ -10,41 +11,44 @@ import EmptyState from '../components/EmptyState';
 import MessageInput from '../components/MessageInput';
 import MessagesList from '../components/MessagesList';
 import Sidebar from '../components/Sidebar';
+import type { Conversation, Message } from '../../../shared/types';
 
-interface ChatPageProps {
-  user: { id: string; email: string; username: string };
-  isConnected: boolean;
-  conversations: Conversation[];
-  onLogout: () => void;
-  onConversationSelect: (conversationId: string) => void;
-  onSendMessage: (conversationId: string, content: string) => void;
-  onJoinConversation: (conversationId: string) => void;
-  selectedConversationId: string | null;
-  messages: Message[];
-}
+export default function ChatPage() {
+  const { user, isAuthenticated, isLoading, logout, redirectToLogin } = useAuth();
+  const {
+    isConnected,
+    joinConversation,
+    sendMessage,
+    onMessage,
+    onConversationHistory,
+    onError,
+  } = useSocketContext();
 
-function ChatPage({
-  user,
-  isConnected,
-  conversations,
-  onLogout,
-  onConversationSelect,
-  onSendMessage,
-  onJoinConversation,
-  selectedConversationId,
-  messages
-}: ChatPageProps) {
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      redirectToLogin();
+    }
+  }, [isAuthenticated, isLoading, redirectToLogin]);
+
+  const { data: conversations = [] } = useQuery({
+    queryKey: ['conversations'],
+    queryFn: () => api.conversations.getAll(),
+    enabled: isAuthenticated,
+  });
 
   const createConversationMutation = useMutation({
     mutationFn: (data: { name?: string; participants: string[] }) => 
       api.conversations.create(data),
     onSuccess: (newConversation) => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
-      onConversationSelect(newConversation.id);
-      onJoinConversation(newConversation.id);
+      handleConversationSelect(newConversation.id);
+      joinConversation(newConversation.id);
     },
     onError: (error) => {
       console.error('Failed to create conversation:', error);
@@ -52,9 +56,39 @@ function ChatPage({
     },
   });
 
+  useEffect(() => {
+    const unsubscribeMessage = onMessage((message) => {
+      if (message.conversationId === selectedConversationId) {
+        setMessages((prev) => [...prev, message]);
+      }
+    });
+
+    const unsubscribeHistory = onConversationHistory((data) => {
+      if (data.conversationId === selectedConversationId) {
+        setMessages(data.messages);
+      }
+    });
+
+    const unsubscribeError = onError((error) => {
+      console.error('Socket error:', error.message);
+    });
+
+    return () => {
+      unsubscribeMessage();
+      unsubscribeHistory();
+      unsubscribeError();
+    };
+  }, [selectedConversationId, onMessage, onConversationHistory, onError]);
+
+  const handleConversationSelect = (conversationId: string) => {
+    setSelectedConversationId(conversationId);
+    setMessages([]);
+    joinConversation(conversationId);
+  };
+
   const handleSendMessage = (message: string) => {
     if (selectedConversationId) {
-      onSendMessage(selectedConversationId, message);
+      sendMessage(selectedConversationId, message);
     }
   };
 
@@ -76,6 +110,21 @@ function ChatPage({
     return conversation?.name || `Conversation ${selectedConversationId.slice(0, 8)}`;
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return null;
+  }
+
   return (
     <>
       <CreateConversationModal
@@ -92,8 +141,8 @@ function ChatPage({
           isConnected={isConnected}
           conversations={conversations}
           selectedConversationId={selectedConversationId}
-          onLogout={onLogout}
-          onConversationSelect={onConversationSelect}
+          onLogout={logout}
+          onConversationSelect={handleConversationSelect}
           onCreateConversation={handleCreateConversation}
           isCreatingConversation={createConversationMutation.isPending}
         />
@@ -116,5 +165,3 @@ function ChatPage({
     </>
   );
 }
-
-export default ChatPage;

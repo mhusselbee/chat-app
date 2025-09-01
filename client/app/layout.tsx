@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryProvider } from './providers'
+import { SocketProvider } from './context/SocketContext'
 import './globals.css'
 
 export const metadata = {
@@ -16,7 +17,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ReactQueryProvider>
-          {children}
+          <SocketProvider>
+            {children}
+          </SocketProvider>
         </ReactQueryProvider>
       </body>
     </html>

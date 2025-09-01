@@ -1,25 +1,33 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { api } from '../lib/api';
+import { useAuth } from '../hooks/useAuth';
+import { useSocketContext } from '../context/SocketContext';
 import type { SignUpRequest, SignInRequest } from '../../../shared/types';
 
-interface LoginPageProps {
-  isConnected: boolean;
-  onAuthSuccess: (user: { id: string; email: string; username: string }, token: string) => void;
-}
-
-function LoginPage({ isConnected, onAuthSuccess }: LoginPageProps) {
+export default function LoginPage() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [signInForm, setSignInForm] = useState({ email: '', password: '' });
   const [signUpForm, setSignUpForm] = useState({ email: '', username: '', password: '' });
   const [authError, setAuthError] = useState('');
+  
+  const { isAuthenticated, isLoading, login, redirectToChat } = useAuth();
+  const { isConnected } = useSocketContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      redirectToChat();
+    }
+  }, [isAuthenticated, isLoading, redirectToChat]);
 
   const signInMutation = useMutation({
     mutationFn: (data: SignInRequest) => api.auth.signin(data),
     onSuccess: (response) => {
-      onAuthSuccess(response.user, response.token);
+      login(response.user, response.token);
       setAuthError('');
     },
     onError: (error: Error) => {
@@ -30,7 +38,7 @@ function LoginPage({ isConnected, onAuthSuccess }: LoginPageProps) {
   const signUpMutation = useMutation({
     mutationFn: (data: SignUpRequest) => api.auth.signup(data),
     onSuccess: (response) => {
-      onAuthSuccess(response.user, response.token);
+      login(response.user, response.token);
       setAuthError('');
     },
     onError: (error: Error) => {
@@ -49,6 +57,17 @@ function LoginPage({ isConnected, onAuthSuccess }: LoginPageProps) {
     setAuthError('');
     signUpMutation.mutate(signUpForm);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -187,5 +206,3 @@ function LoginPage({ isConnected, onAuthSuccess }: LoginPageProps) {
     </div>
   );
 }
-
-export default LoginPage;
