@@ -1,6 +1,6 @@
 import { useRef, useEffect } from "react";
 
-export default function useScrollIntoView(behavior: ScrollBehavior = "instant") {
+export default function useScrollIntoView(behavior: ScrollBehavior = "smooth") {
     const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
