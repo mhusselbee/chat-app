@@ -3,7 +3,8 @@ import { and, desc, eq, inArray } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import db from '../../db';
 import { conversationParticipants, conversations, users } from '../../db/schema';
-import { AuthenticatedRequest } from '../middleware';
+import { AuthenticatedRequest } from '../../utils/auth';
+
 
 export const getConversations = async (req: AuthenticatedRequest, res: Response) => {
   try {

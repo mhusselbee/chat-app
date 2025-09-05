@@ -1,1 +1,1 @@
-export { authenticateToken, AuthenticatedRequest } from './auth';
+export { authenticateToken } from './auth';
